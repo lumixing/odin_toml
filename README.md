@@ -65,7 +65,7 @@ main :: proc() {
 these are some quirks that don't align with the spec:
 - values get prioritized over keys, so `1 = "one"` doesn't get parsed even though it should (use quoted keys for now)
 - signed hex/octo/binary integers get parsed (`+0xABCD`, `-0o200`) even though they shouldn't
-- integers with invalid underscored get parsed (`_123`, `1__23`, `123_`) even though they shouldn't
+- integers with invalid underscores get parsed (`_123`, `1__23`, `123_`) even though they shouldn't
 - out of range integers don't throw an error even though they should, they just wrap around 
 
 ## spec completion list
