@@ -1,7 +1,5 @@
 package toml
 
-import "core:fmt"
-
 Parser :: struct {
 	source:  []u8,
 	tokens:  []Token,
@@ -35,10 +33,12 @@ parser_scan :: proc(parser: ^Parser) -> Maybe(Error) {
 				return parser_error(parser^, .MissingValue)
 			}
 			parser_advance(parser)
-			parser_white(parser)
 
-			if err := parser_expect(parser, .Newline); err != nil {
-				return err
+			parser_white(parser)
+			if peek := parser_peek(parser^).type; peek == .Newline || peek == .EOF {
+				parser_advance(parser)
+			} else {
+				return parser_error(parser^, .MissingNewline)
 			}
 
 			append(&parser.expr, Keyval{name, value})
@@ -52,7 +52,8 @@ parser_scan :: proc(parser: ^Parser) -> Maybe(Error) {
 
 @(private = "file")
 parser_error :: proc(parser: Parser, error_type: ErrorType) -> Error {
-	line, col := get_line_col(parser.source, parser.tokens[parser.current].span.lo)
+	i := parser_is_end(parser) ? parser.start : parser.current
+	line, col := get_line_col(parser.source, parser.tokens[i].span.lo)
 	return {line, col, error_type}
 }
 
