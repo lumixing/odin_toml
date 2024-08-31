@@ -13,7 +13,7 @@ ParseFlag :: enum {
 ParseFlags :: distinct bit_set[ParseFlag]
 
 parse_file :: proc(filename: string, flags: ParseFlags = {}) -> (Tree, Maybe(Error)) {
-	data, ok := os.read_entire_file("examples/test.toml")
+	data, ok := os.read_entire_file(filename)
 	if !ok {
 		panic("could not open file")
 	}

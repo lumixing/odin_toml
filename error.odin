@@ -11,6 +11,7 @@ ErrorType :: enum {
 	InvalidEscape,
 	InvalidReturn,
 	InvalidCharacter,
+	InvalidInteger,
 
 	// parser errors
 	MissingKey,

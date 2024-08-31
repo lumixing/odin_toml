@@ -99,13 +99,31 @@ lexer_scan :: proc(lexer: ^Lexer) -> Maybe(Error) {
 			for lexer_peek(lexer^) != '\r' && lexer_peek(lexer^) != '\n' && !lexer_is_end(lexer^) {
 				lexer_advance(lexer)
 			}
+		case '+':
+			for is_digit(lexer_peek(lexer^)) || lexer_peek(lexer^) == '_' {
+				lexer_advance(lexer)
+			}
+
+			str := lexer_span_as_string(lexer^)
+			if v, ok := strconv.parse_i64(str); ok {
+				lexer_add_token(lexer, .Integer, v)
+			} else {
+				return lexer_error(lexer^, .InvalidInteger)
+			}
 		case:
 			if is_name(char) {
 				for is_name(lexer_peek(lexer^)) {
 					lexer_advance(lexer)
 				}
 
-				switch str := lexer_span_as_string(lexer^); str {
+				str := lexer_span_as_string(lexer^)
+
+				if v, ok := strconv.parse_i64_maybe_prefixed(str); ok {
+					lexer_add_token(lexer, .Integer, v)
+					continue
+				}
+
+				switch str {
 				case "true":
 					lexer_add_token(lexer, .Bool, true)
 				case "false":

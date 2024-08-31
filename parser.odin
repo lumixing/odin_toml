@@ -31,6 +31,8 @@ parser_scan :: proc(parser: ^Parser) -> Maybe(Error) {
 				value = parser_peek(parser^).value.(string)
 			} else if parser_peek(parser^).type == .Bool {
 				value = parser_peek(parser^).value.(bool)
+			} else if parser_peek(parser^).type == .Integer {
+				value = parser_peek(parser^).value.(i64)
 			} else {
 				return parser_error(parser^, .MissingValue)
 			}
