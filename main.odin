@@ -1,5 +1,6 @@
 package toml
 
+import "core:flags"
 import "core:fmt"
 import "core:os"
 import "core:reflect"
@@ -8,6 +9,7 @@ Test :: struct {
 	username: string,
 	friend:   string,
 	genius:   bool,
+	dev:      string `default=a default value!`,
 }
 
 main :: proc() {
@@ -63,9 +65,13 @@ unmarshal :: proc(model: ^$T, tree: Tree) {
 	for field in reflect.struct_fields_zipped(Test) {
 		switch field.type.id {
 		case string:
+			ptr := cast(^string)(cast(uintptr)model + field.offset)
 			if value, ok := get(tree, field.name, string); ok {
-				ptr := cast(^string)(cast(uintptr)model + field.offset)
 				ptr^ = value
+			} else {
+				if v, ok := flags.get_subtag(string(field.tag), "default"); ok {
+					ptr^ = v
+				}
 			}
 		case bool:
 			if value, ok := get(tree, field.name, bool); ok {
