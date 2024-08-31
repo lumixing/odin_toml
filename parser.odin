@@ -1,5 +1,6 @@
 package toml
 
+@(private)
 Parser :: struct {
 	source:  []u8,
 	tokens:  []Token,
@@ -8,6 +9,7 @@ Parser :: struct {
 	current: int,
 }
 
+@(private)
 parser_scan :: proc(parser: ^Parser) -> Maybe(Error) {
 	for !parser_is_end(parser^) {
 		parser.start = parser.current

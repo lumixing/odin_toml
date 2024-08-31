@@ -6,6 +6,7 @@ import "core:strings"
 import "core:time"
 import "core:unicode"
 
+@(private)
 Lexer :: struct {
 	source:  []byte,
 	tokens:  [dynamic]Token,
@@ -13,6 +14,7 @@ Lexer :: struct {
 	current: int,
 }
 
+@(private)
 lexer_scan :: proc(lexer: ^Lexer) -> Maybe(Error) {
 	for !lexer_is_end(lexer^) {
 		lexer.start = lexer.current

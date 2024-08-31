@@ -5,48 +5,12 @@ import "core:fmt"
 import "core:os"
 import "core:reflect"
 
-Test :: struct {
-	username:  string,
-	friend:    string `default=a default value!`,
-	genius:    bool,
-	cool_name: string `name=cool name`,
-}
-
-main :: proc() {
-	tree, err := parse_file("examples/test.toml", {.PrintTokens, .PrintExpressions})
-	if err != nil {
-		fmt.panicf("%v", err)
-	}
-	test: Test
-	unmarshal(&test, tree)
-	fmt.println(test)
-}
-
 ParseFlag :: enum {
 	PrintTokens,
 	PrintExpressions,
 }
 
 ParseFlags :: distinct bit_set[ParseFlag]
-
-Error :: struct {
-	line, column: int,
-	type:         ErrorType,
-}
-
-ErrorType :: enum {
-	// lexer errors
-	UnterminatedString,
-	InvalidEscape,
-	InvalidReturn,
-	InvalidCharacter,
-	// parser errors
-	MissingKey,
-	MissingValue,
-	MissingNewline,
-	MissingEquals,
-	UnknownError,
-}
 
 parse_file :: proc(filename: string, flags: ParseFlags = {}) -> (Tree, Maybe(Error)) {
 	data, ok := os.read_entire_file("examples/test.toml")
@@ -130,19 +94,4 @@ unmarshal :: proc(model: ^$T, tree: Tree) {
 			}
 		}
 	}
-}
-
-@(private)
-get_line_col :: proc(source: []u8, lo: int) -> (line, col: int) {
-	line = 1
-	col = 1
-	for i in 0 ..< lo {
-		if source[i] == '\n' {
-			line += 1
-			col = 1
-		} else {
-			col += 1
-		}
-	}
-	return line, col
 }

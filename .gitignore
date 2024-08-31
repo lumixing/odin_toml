@@ -2,3 +2,4 @@
 /examples
 *.old
 *.abnf
+main.odin
