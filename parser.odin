@@ -54,7 +54,7 @@ parser_scan :: proc(parser: ^Parser) -> Maybe(Error) {
 parser_error :: proc(parser: Parser, error_type: ErrorType) -> Error {
 	i := parser_is_end(parser) ? parser.start : parser.current
 	line, col := get_line_col(parser.source, parser.tokens[i].span.lo)
-	return {line, col, error_type}
+	return {line, col - 1, error_type}
 }
 
 @(private = "file")

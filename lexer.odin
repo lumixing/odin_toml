@@ -13,7 +13,7 @@ Lexer :: struct {
 	current: int,
 }
 
-lexer_scan :: proc(lexer: ^Lexer) {
+lexer_scan :: proc(lexer: ^Lexer) -> Maybe(Error) {
 	for !lexer_is_end(lexer^) {
 		lexer.start = lexer.current
 		char := lexer_advance(lexer)
@@ -26,16 +26,57 @@ lexer_scan :: proc(lexer: ^Lexer) {
 			lexer_add_token(lexer, .White)
 		case '\r':
 			if lexer_peek(lexer^) != '\n' {
-				fmt.panicf(`expected \n, got %q after \r`, lexer_peek(lexer^))
+				return lexer_error(lexer^, .InvalidReturn)
 			}
 		case '\n':
 			lexer_add_token(lexer, .Newline)
 		case '=':
 			lexer_add_token(lexer, .Equals)
 		case '"':
+			builder := new(strings.Builder)
+			strings.builder_init(builder)
 			terminated := true
 
 			for lexer_peek(lexer^) != '"' {
+				peek, ok := lexer_peek(lexer^)
+				if peek == '\r' || peek == '\n' || !ok {
+					terminated = false
+					break
+				}
+
+				if peek == '\\' {
+					lexer_advance(lexer)
+					switch peek := lexer_advance(lexer); peek {
+					case 'n':
+						strings.write_rune(builder, '\n')
+					case 'r':
+						strings.write_rune(builder, '\r')
+					case 't':
+						strings.write_rune(builder, '\t')
+					case '\\':
+						strings.write_rune(builder, '\\')
+					case '"':
+						strings.write_rune(builder, '"')
+					case:
+						return lexer_error(lexer^, .InvalidEscape)
+					}
+				} else {
+					strings.write_rune(builder, peek)
+					lexer_advance(lexer)
+				}
+			}
+
+			lexer_advance(lexer)
+
+			if !terminated {
+				return lexer_error(lexer^, .UnterminatedString)
+			}
+
+			lexer_add_token(lexer, .String, strings.to_string(builder^))
+		case '\'':
+			terminated := true
+
+			for lexer_peek(lexer^) != '\'' {
 				peek, ok := lexer_peek(lexer^)
 				if peek == '\r' || peek == '\n' || !ok {
 					terminated = false
@@ -48,7 +89,7 @@ lexer_scan :: proc(lexer: ^Lexer) {
 			lexer_advance(lexer)
 
 			if !terminated {
-				fmt.panicf("unterminated string")
+				return lexer_error(lexer^, .UnterminatedString)
 			}
 
 			lexer_add_token(lexer, .String, lexer_span_as_string(lexer^, 1, 1))
@@ -71,12 +112,20 @@ lexer_scan :: proc(lexer: ^Lexer) {
 					lexer_add_token(lexer, .Ident, str)
 				}
 			} else {
-				fmt.panicf("invalid char: %c (%d)", char, char)
+				return lexer_error(lexer^, .InvalidCharacter)
 			}
 		}
 	}
 
 	lexer_add_token(lexer, .EOF)
+	return nil
+}
+
+@(private = "file")
+lexer_error :: proc(lexer: Lexer, error_type: ErrorType) -> Error {
+	i := lexer_is_end(lexer) ? lexer.start : lexer.current
+	line, col := get_line_col(lexer.source, i)
+	return {line, col - 1, error_type}
 }
 
 @(private = "file")

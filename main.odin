@@ -35,6 +35,12 @@ Error :: struct {
 }
 
 ErrorType :: enum {
+	// lexer errors
+	UnterminatedString,
+	InvalidEscape,
+	InvalidReturn,
+	InvalidCharacter,
+	// parser errors
 	MissingKey,
 	MissingValue,
 	MissingNewline,
@@ -50,7 +56,10 @@ parse_file :: proc(filename: string, flags: ParseFlags = {}) -> (Tree, Maybe(Err
 
 	lexer := new(Lexer)
 	lexer.source = data
-	lexer_scan(lexer)
+	err := lexer_scan(lexer)
+	if err != nil {
+		return {}, err
+	}
 
 	if .PrintTokens in flags {
 		for token in lexer.tokens {
@@ -81,7 +90,7 @@ parse_file :: proc(filename: string, flags: ParseFlags = {}) -> (Tree, Maybe(Err
 	parser := new(Parser)
 	parser.source = data
 	parser.tokens = lexer.tokens[:]
-	err := parser_scan(parser)
+	err = parser_scan(parser)
 	if err != nil {
 		return {}, err
 	}
