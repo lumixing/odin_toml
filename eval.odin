@@ -4,6 +4,7 @@ import "core:reflect"
 
 Tree :: distinct map[string]Value
 
+@(private)
 eval :: proc(expr: []Expr) -> Tree {
 	tree: Tree
 
