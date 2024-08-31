@@ -27,10 +27,14 @@ parser_scan :: proc(parser: ^Parser) {
 			if parser_peek(parser^).type == .White {
 				parser_advance(parser)
 			}
-			if parser_peek(parser^).type != .String {
-				fmt.panicf("expected string")
+			value: Value
+			if parser_peek(parser^).type == .String {
+				value = parser_peek(parser^).value.(string)
+			} else if parser_peek(parser^).type == .Bool {
+				value = parser_peek(parser^).value.(bool)
+			} else {
+				fmt.panicf("expected bool or string")
 			}
-			value := parser_peek(parser^).value.(string)
 			parser_advance(parser)
 			if parser_advance(parser).type != .Newline {
 				fmt.panicf("expected newline")

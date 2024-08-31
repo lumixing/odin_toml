@@ -1,5 +1,7 @@
 package toml
 
+import "core:reflect"
+
 Tree :: distinct map[string]Value
 
 eval :: proc(expr: []Expr) -> Tree {
