@@ -3,3 +3,4 @@
 *.old
 *.abnf
 main.odin
+ols.json
