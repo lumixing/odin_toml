@@ -63,10 +63,10 @@ main :: proc() {
 
 ## quirks
 these are some quirks that don't align with the spec:
-- values get prioritized over keys, so `1 = "one"` doesn't parse even though it should (use quoted keys for now)
-- signed hex/octo/binary integers parse (`+0xABCD`, `-0o200`) even though they shouldn't
-- invalid underscores in integers parse (`_123`, `1__23`, `123_`) even though they shouldn't
-- out of range integers don't throw an error even though they should, they wrap around 
+- values get prioritized over keys, so `1 = "one"` doesn't get parsed even though it should (use quoted keys for now)
+- signed hex/octo/binary integers get parsed (`+0xABCD`, `-0o200`) even though they shouldn't
+- integers with invalid underscored get parsed (`_123`, `1__23`, `123_`) even though they shouldn't
+- out of range integers don't throw an error even though they should, they just wrap around 
 
 ## spec completion list
 spec: https://toml.io/en/v1.0.0  
